@@ -1,0 +1,70 @@
+Configuration	ABP_pressure_sensor
+STM32CubeMX 	6.10.0
+Date	01/17/2024
+MCU	STM32G474RETx
+
+
+
+PERIPHERALS	MODES	FUNCTIONS	PINS
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+SYS	Dead Battery Signals disabled	SYS_VS_DBSignals	VP_SYS_VS_DBSignals
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+2	PC13	GPIO_EXTI13	B1 [blue push button]
+3	PC14-OSC32_IN*	RCC_OSC32_IN	
+4	PC15-OSC32_OUT*	RCC_OSC32_OUT	
+5	PF0-OSC_IN*	RCC_OSC_IN	
+6	PF1-OSC_OUT*	RCC_OSC_OUT	
+14	PA2*	LPUART1_TX	LPUART1_TX [STLINKV3E_VCP_RX]
+17	PA3*	LPUART1_RX	LPUART1_RX [STLINKV3E_VCP_TX]
+19	PA5	GPIO_Output	LD2 [green led]
+49	PA13*	SYS_JTMS-SWDIO	T_SWDIO
+50	PA14*	SYS_JTCK-SWCLK	T_SWCLK
+56	PB3*	SYS_JTDO-SWO	T_SWO
+PERIPHERALS	MODES	FUNCTIONS	PINS
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+SYS	Dead Battery Signals disabled	SYS_VS_DBSignals	VP_SYS_VS_DBSignals
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+2	PC13	GPIO_EXTI13	B1 [blue push button]
+3	PC14-OSC32_IN*	RCC_OSC32_IN	
+4	PC15-OSC32_OUT*	RCC_OSC32_OUT	
+5	PF0-OSC_IN*	RCC_OSC_IN	
+6	PF1-OSC_OUT*	RCC_OSC_OUT	
+14	PA2*	LPUART1_TX	LPUART1_TX [STLINKV3E_VCP_RX]
+17	PA3*	LPUART1_RX	LPUART1_RX [STLINKV3E_VCP_TX]
+19	PA5	GPIO_Output	LD2 [green led]
+49	PA13*	SYS_JTMS-SWDIO	T_SWDIO
+50	PA14*	SYS_JTCK-SWCLK	T_SWCLK
+56	PB3*	SYS_JTDO-SWO	T_SWO
+
+
+
+SOFTWARE PROJECT
+
+Project Settings : 
+Project Name : ABP_pressure_sensor
+Project Folder : /home/ebrahim/STM32CubeIDE/PD/ABP_pressure_sensor
+Toolchain / IDE : STM32CubeIDE
+Firmware Package Name and Version : STM32Cube FW_G4 V1.5.2
+
+
+Code Generation Settings : 
+STM32Cube MCU packages and embedded software packs : Add necessary library files as reference in the toolchain project configuration file
+Generate peripheral initialization as a pair of '.c/.h' files per peripheral : No
+Backup previously generated files when re-generating : No
+Delete previously generated files when not re-generated : Yes
+Set all free pins as analog (to optimize the power consumption) : No
+
+
+Toolchains Settings : 
+Compiler Optimizations : 
+
+
+
+
+
