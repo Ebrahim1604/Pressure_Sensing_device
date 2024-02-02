@@ -110,7 +110,7 @@ int main(void)
 
   char buff[100];
   sprintf(buff,"Pressure Sensor Demo\n");
-  HAL_UART_Transmit(&hlpuart1, (uint8_t *)printBuffer, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
+  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
 
   sprintf(printBuffer, "\nStatus Register, 24-bit Sensor data, Digital Pressure Counts, \
       Percentage of full scale pressure, Pressure Output, Temperature\n"); //load string data in the string array
@@ -129,7 +129,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  HAL_Delay(10);
+	  HAL_Delay(500);
 
 	  uint8_t data[7] = {0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	  uint8_t cmd[3] = {0xAA, 0x00, 0x00}; //read command
@@ -154,7 +154,7 @@ int main(void)
 	  sprintf(pBuff, "%.3f", pressure);
 	  sprintf(tBuff, "%.3f", temperature);
 
-	  sprintf(printBuffer, "%02X\t%02X %02X %02X\t%s\t%s\t%s\t%s \n", data[0], data[1], data[2], data[3], cBuff, percBuff, pBuff, tBuff);
+	  sprintf(printBuffer, "Data[0]=%02X\t,Data[1]=%02X,Data[2]=%02X,Data[3]=%02X\t,Press_counts=%s\t,Percent=%s\t,Pressure=%s\t,Temp=%s \n\n", data[0], data[1], data[2], data[3], cBuff, percBuff, pBuff, tBuff);
 	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)printBuffer, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
 
   }
