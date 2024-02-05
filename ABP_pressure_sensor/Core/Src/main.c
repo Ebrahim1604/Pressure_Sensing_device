@@ -58,21 +58,17 @@ static void MX_SPI1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+double TF(uint16_t data); //transfer function
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-double press_counts = 0; // digital pressure reading [counts]
-double temp_counts = 0; // digital temperature reading [counts]
-double pressure = 0; // pressure reading [bar, psi, kPa, etc.]
-double temperature = 0; // temperature reading in deg C
-double outputmax = 15099494; // output at maximum pressure [counts]
-double outputmin = 1677722; // output at minimum pressure [counts]
-double pmax = 1; // maximum value of pressure range [bar, psi, kPa, etc.]
-double pmin = 0; // minimum value of pressure range [bar, psi, kPa, etc.]
-double percentage = 0; // holds percentage of full scale data
-char printBuffer[200], cBuff[20], percBuff[20], pBuff[20], tBuff[20];
 
+double pressure_psi = 0.0; //pressure value in psi
+double pressure_bar = 0.0; //pressure value in bar
+uint8_t sensor_data[2]; //SPI output from sensor data
+uint16_t data = 0x0000; //16 bit data
 /* USER CODE END 0 */
 
 /**
@@ -108,16 +104,16 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_Delay(1000); // Delay for sensor stability
 
-  char buff[100];
-  sprintf(buff,"Pressure Sensor Demo\n");
-  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
+  char buff1[100];
+  char buff2[100];
 
-  sprintf(printBuffer, "\nStatus Register, 24-bit Sensor data, Digital Pressure Counts, \
-      Percentage of full scale pressure, Pressure Output, Temperature\n"); //load string data in the string array
+  sprintf(buff1,"Pressure Sensor Demo: ABPDANV150PGSA3, 0 to 150 psi, 10% to 90% of total value, No tempurature\n");
+  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff1, strlen(buff1), HAL_MAX_DELAY); //print loaded string
 
-  HAL_UART_Transmit(&hlpuart1, (uint8_t *)printBuffer, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); // Set SS line HIGH
 
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // Set SS line HIGH
+  sensor_data[0] = 0x00;
+  sensor_data[1] = 0x00;
 
   /* USER CODE END 2 */
 
@@ -129,33 +125,21 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  HAL_Delay(500);
+	  HAL_Delay(10);
 
-	  uint8_t data[7] = {0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	  uint8_t cmd[3] = {0xAA, 0x00, 0x00}; //read command
+	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
+	  HAL_SPI_Receive(&hspi1, sensor_data, 2, HAL_MAX_DELAY); // Receive sensor data
+	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
 
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // set SS Low
-	  HAL_SPI_Transmit(&hspi1, cmd, 3, HAL_MAX_DELAY);      // send Read Command
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);   // set SS High
-	  HAL_Delay(10);                                        // wait for conversion
+	  data |= sensor_data[1];
+	  data |= (uint16_t)sensor_data[0]<<8;
 
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-	  HAL_SPI_Receive(&hspi1, data, 7, HAL_MAX_DELAY);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+	  pressure_psi = TF(data);
+	  pressure_bar = pressure_psi*0.0689476;
 
-	  press_counts = (double)((int32_t)data[3]+(int32_t)data[2]*(int32_t)256+ (int32_t)data[1]*(int32_t)65536);
-	  temp_counts = (double)((int32_t)data[6] + (int32_t)data[5] * (int32_t)256 + (int32_t)data[4] * (int32_t)65536);
-	  temperature = (temp_counts * 200 / 16777215) - 50;
-	  percentage = (press_counts / 16777215) * 100;
-	  pressure = ((press_counts - outputmin) * (pmax - pmin)) / (outputmax - outputmin) + pmin;
+	  sprintf(buff2,"data[0]=%02X,data[1]=%02X,sensor_output=%02X, Pressure= %s psi,Pressure(bar)= %s bar",sensor_data[0],sensor_data[1],data,pressure_psi,pressure_bar);
 
-	  sprintf(cBuff, "%.1f", press_counts);
-	  sprintf(percBuff, "%.3f", percentage);
-	  sprintf(pBuff, "%.3f", pressure);
-	  sprintf(tBuff, "%.3f", temperature);
-
-	  sprintf(printBuffer, "Data[0]=%02X\t,Data[1]=%02X,Data[2]=%02X,Data[3]=%02X\t,Press_counts=%s\t,Percent=%s\t,Pressure=%s\t,Temp=%s \n\n", data[0], data[1], data[2], data[3], cBuff, percBuff, pBuff, tBuff);
-	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)printBuffer, strlen(printBuffer), HAL_MAX_DELAY); //print loaded string
+	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff2), HAL_MAX_DELAY); //print loaded string
 
   }
   /* USER CODE END 3 */
@@ -272,7 +256,7 @@ static void MX_SPI1_Init(void)
   /* SPI1 parameter configuration*/
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
@@ -309,10 +293,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -320,12 +303,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  /*Configure GPIO pin : PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
@@ -336,6 +319,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+double TF(uint16_t data)
+{
+	double _data = (double)data;
+	if (_data <= 16384 * 0.1) return 0.0;
+	else if (_data >= 16384 * 0.9) return 150.0;
+	else return ((_data - 1638)*0.0114443);
+}
 
 /* USER CODE END 4 */
 
