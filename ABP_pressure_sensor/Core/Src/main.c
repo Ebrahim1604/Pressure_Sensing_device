@@ -133,12 +133,16 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	  HAL_Delay(10);
-	  printf("checkpoint 1\n");
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
+	  HAL_SPI_Transmit(&hspi1, 0x00, 1, HAL_MAX_DELAY);      // send Read Command
+	  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);   // set SS High
+	  HAL_Delay(10);
+	  //printf("checkpoint 1\n");
+	  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
 	  HAL_SPI_Receive(&hspi1, sensor_data, 2, HAL_MAX_DELAY); // Receive sensor data
-	  printf("checkpoint 2\n");
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
-	  printf("checkpoint 3\n");
+	  //printf("checkpoint 2\n");
+	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); // set SS High
+	  //printf("checkpoint 3\n");
 
 	  data |= sensor_data[1];
 	  data |= (uint16_t)sensor_data[0]<<8;
@@ -146,7 +150,7 @@ int main(void)
 	  pressure_psi = TF(data);
 	  pressure_bar = pressure_psi*0.0689476;
 
-	  sprintf(buff2,"data[0]=%02X,data[1]=%02X,sensor_output=%02X, Pressure= %lf psi,Pressure(bar)= %lf bar",sensor_data[0],sensor_data[1],data,pressure_psi,pressure_bar);
+	  sprintf(buff2,"data[0]=%02X,data[1]=%02X,sensor_output=%02X, Pressure= %lf psi,Pressure(bar)= %lf bar\n\n",sensor_data[0],sensor_data[1],data,pressure_psi,pressure_bar);
 
 	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff2), HAL_MAX_DELAY); //print loaded string
 
