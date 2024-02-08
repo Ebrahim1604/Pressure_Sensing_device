@@ -69,6 +69,13 @@ double pressure_psi = 0.0; //pressure value in psi
 double pressure_bar = 0.0; //pressure value in bar
 uint8_t sensor_data[2]; //SPI output from sensor data
 uint16_t data = 0x0000; //16 bit data
+
+int fputc(int ch, FILE *f)
+{
+    HAL_UART_Transmit(&hlpuart1, (unsigned char *)&ch, 1, 100);
+    return ch;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -107,7 +114,7 @@ int main(void)
   char buff1[100];
   char buff2[100];
 
-  sprintf(buff1,"Pressure Sensor Demo: ABPDANV150PGSA3, 0 to 150 psi, 10% to 90% of total value, No tempurature\n");
+  sprintf(buff1,"Pressure Sensor Demo: ABPDANV150PGSA3, 0 to 150 psi, 10 per to 90 per of total value, No tempurature\n");
   HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff1, strlen(buff1), HAL_MAX_DELAY); //print loaded string
 
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); // Set SS line HIGH
@@ -126,10 +133,12 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	  HAL_Delay(10);
-
+	  printf("checkpoint 1\n");
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
 	  HAL_SPI_Receive(&hspi1, sensor_data, 2, HAL_MAX_DELAY); // Receive sensor data
+	  printf("checkpoint 2\n");
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+	  printf("checkpoint 3\n");
 
 	  data |= sensor_data[1];
 	  data |= (uint16_t)sensor_data[0]<<8;
@@ -137,7 +146,7 @@ int main(void)
 	  pressure_psi = TF(data);
 	  pressure_bar = pressure_psi*0.0689476;
 
-	  sprintf(buff2,"data[0]=%02X,data[1]=%02X,sensor_output=%02X, Pressure= %s psi,Pressure(bar)= %s bar",sensor_data[0],sensor_data[1],data,pressure_psi,pressure_bar);
+	  sprintf(buff2,"data[0]=%02X,data[1]=%02X,sensor_output=%02X, Pressure= %lf psi,Pressure(bar)= %lf bar",sensor_data[0],sensor_data[1],data,pressure_psi,pressure_bar);
 
 	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff2), HAL_MAX_DELAY); //print loaded string
 
