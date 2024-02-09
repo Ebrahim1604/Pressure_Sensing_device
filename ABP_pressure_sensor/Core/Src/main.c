@@ -134,9 +134,9 @@ int main(void)
 
 	  HAL_Delay(10);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
-	  HAL_SPI_Transmit(&hspi1, 0x00, 1, HAL_MAX_DELAY);      // send Read Command
+	  //HAL_SPI_Transmit(&hspi1, 0x00, 1, HAL_MAX_DELAY);      // send Read Command
 	  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);   // set SS High
-	  HAL_Delay(10);
+	  //HAL_Delay(10);
 	  //printf("checkpoint 1\n");
 	  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); // set SS Low
 	  HAL_SPI_Receive(&hspi1, sensor_data, 2, HAL_MAX_DELAY); // Receive sensor data
@@ -144,8 +144,7 @@ int main(void)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); // set SS High
 	  //printf("checkpoint 3\n");
 
-	  data |= sensor_data[1];
-	  data |= (uint16_t)sensor_data[0]<<8;
+	  data = sensor_data[0]*256 + sensor_data[1];
 
 	  pressure_psi = TF(data);
 	  pressure_bar = pressure_psi*0.0689476;
