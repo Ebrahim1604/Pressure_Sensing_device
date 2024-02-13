@@ -97,6 +97,16 @@ int main(void)
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  char buff1[100];
+  char buff2[100];
+  char buff3[100];
+  char buff4[100];
+
+  sprintf(buff1,"12v Input Mode off!\n");
+  sprintf(buff2,"12v Input Mode ON\n");
+  sprintf(buff3,"12v signal detected....\n");
+  sprintf(buff4,"No 12v signal detected\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,14 +119,19 @@ int main(void)
 
 	  if (HAL_GPIO_ReadPin(GPIOA, twelve_v_switch) == GPIO_PIN_RESET) // If PA10 (switch) is low
 	  {
+		  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff1), HAL_MAX_DELAY);
+		  HAL_Delay(10);
+
 		  if(HAL_GPIO_ReadPin(GPIOA, twelve_v_line) == GPIO_PIN_SET)
 		  {
+			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff3, strlen(buff1), HAL_MAX_DELAY);
 			  HAL_GPIO_WritePin(GPIOB, twelve_v_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
 			  HAL_GPIO_WritePin(GPIOB, twelve_v_RED_LED, GPIO_PIN_RESET); // Turn off red LED
 		  }
 
 		  else
 		  {
+			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff4, strlen(buff1), HAL_MAX_DELAY);
 			  HAL_GPIO_WritePin(GPIOB, twelve_v_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
 			  HAL_GPIO_WritePin(GPIOB, twelve_v_RED_LED, GPIO_PIN_SET); // Turn on red LED
 		  }
@@ -125,8 +140,9 @@ int main(void)
 
 	  else // If PA10 is high
 	  {
-	              HAL_GPIO_WritePin(GPIOB, twelve_v_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
-	              HAL_GPIO_WritePin(GPIOB, twelve_v_RED_LED, GPIO_PIN_RESET); // Turn off green LED
+		  	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff1, strlen(buff1), HAL_MAX_DELAY);
+			  HAL_GPIO_WritePin(GPIOB, twelve_v_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
+			  HAL_GPIO_WritePin(GPIOB, twelve_v_RED_LED, GPIO_PIN_RESET); // Turn off green LED
 	          }
 
 	          HAL_Delay(100); // Adjust delay as needed
