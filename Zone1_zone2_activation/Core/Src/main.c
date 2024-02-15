@@ -143,6 +143,7 @@ int main(void)
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_SET); // Turn on red LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_SET); // Turn On the buzzer
+	  	  			  HAL_Delay(100);
 	  	  		  }
 
 	  	  		  else //no sensor contact
@@ -151,6 +152,7 @@ int main(void)
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off red LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  	  			  HAL_Delay(100);
 	  	  		  }
 
 	  	  	  }
@@ -161,6 +163,7 @@ int main(void)
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off green LED
 	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  	  			  HAL_Delay(100);
 	  	  	          }
 
 	  		  HAL_Delay(10); // Adjust delay as needed
@@ -176,6 +179,7 @@ int main(void)
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_SET); // Turn on red LED
 					  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_SET); // Turn On the buzzer
+					  HAL_Delay(100);
 	  			  }
 
 	  			  else //no contact enabled
@@ -184,6 +188,7 @@ int main(void)
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off red LED
 					  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+					  HAL_Delay(100);
 	  			  }
 
 	  		  }
@@ -194,6 +199,7 @@ int main(void)
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
 	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off green LED
 	  				  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  				  HAL_Delay(100);
 	  				  }
 
 	  		  HAL_Delay(10); // Adjust delay as needed
