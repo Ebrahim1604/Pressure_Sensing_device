@@ -43,6 +43,8 @@
 #define Zone_two_GREEN_LED GPIO_PIN_9
 #define Zone_two_sensor GPIO_PIN_5
 
+#define buzzer GPIO_PIN_4
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -128,69 +130,73 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  if (HAL_GPIO_ReadPin(GPIOA, Zone_one_switch) == GPIO_PIN_RESET) // If PA0 (switch) is low
-	  	  {
-	  		  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff1), HAL_MAX_DELAY);
-	  		  HAL_Delay(10);
-
-	  		  if(HAL_GPIO_ReadPin(GPIOC, Zone_one_sensor) == GPIO_PIN_SET) //PC7 == 1
-	  		  {
-	  			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff3, strlen(buff1), HAL_MAX_DELAY);
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off red LED
-	  		  }
-
-	  		  else
-	  		  {
-	  			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff4, strlen(buff1), HAL_MAX_DELAY);
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_SET); // Turn on red LED
-	  		  }
-
-	  	  }
-
-	  	  else // If PA0 is high
-	  	  {
-	  		  	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff1, strlen(buff1), HAL_MAX_DELAY);
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
-	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off green LED
-	  	          }
-
-		  HAL_Delay(10); // Adjust delay as needed
-
-	  if (HAL_GPIO_ReadPin(GPIOA, Zone_two_switch) == GPIO_PIN_RESET) // If PA1 (switch) is low
-		  {
-			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff6, strlen(buff1), HAL_MAX_DELAY);
-			  HAL_Delay(10);
-
-			  if(HAL_GPIO_ReadPin(GPIOC, Zone_two_sensor) == GPIO_PIN_SET) //PC7 == 1
-			  {
-				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff7, strlen(buff1), HAL_MAX_DELAY);
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off red LED
-			  }
-
-			  else
-			  {
-				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff8, strlen(buff1), HAL_MAX_DELAY);
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_SET); // Turn on red LED
-			  }
-
-		  }
-
-		  else // If PA0 is high
-		  {
-				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff5, strlen(buff1), HAL_MAX_DELAY);
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
-				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off green LED
-				  }
-
-		  HAL_Delay(10); // Adjust delay as needed
-
-
 
     /* USER CODE BEGIN 3 */
+	  if (HAL_GPIO_ReadPin(GPIOA, Zone_one_switch) == GPIO_PIN_RESET) // If PA0 (switch) is low/Zone 1 is pressed
+	  	  	  {
+	  	  		  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff2, strlen(buff1), HAL_MAX_DELAY);
+	  	  		  HAL_Delay(10);
+
+	  	  		  if(HAL_GPIO_ReadPin(GPIOC, Zone_one_sensor) == GPIO_PIN_SET) //PC7 == 1/Sensor contact enabled
+	  	  		  {
+	  	  			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff3, strlen(buff1), HAL_MAX_DELAY);
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_SET); // Turn on red LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_SET); // Turn On the buzzer
+	  	  		  }
+
+	  	  		  else //no sensor contact
+	  	  		  {
+	  	  			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff4, strlen(buff1), HAL_MAX_DELAY);
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off red LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  	  		  }
+
+	  	  	  }
+
+	  	  	  else // If PA0 is high
+	  	  	  {
+	  	  		  	  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff1, strlen(buff1), HAL_MAX_DELAY);
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, Zone_one_RED_LED, GPIO_PIN_RESET); // Turn off green LED
+	  	  			  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  	  	          }
+
+	  		  HAL_Delay(10); // Adjust delay as needed
+
+	  	  if (HAL_GPIO_ReadPin(GPIOA, Zone_two_switch) == GPIO_PIN_RESET) // If PA1 (switch) is low/zone 2 swtich pressed
+	  		  {
+	  			  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff6, strlen(buff1), HAL_MAX_DELAY);
+	  			  HAL_Delay(10);
+
+	  			  if(HAL_GPIO_ReadPin(GPIOC, Zone_two_sensor) == GPIO_PIN_SET) //PC7 == 1/Sensor contact enabled
+	  			  {
+	  				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff7, strlen(buff1), HAL_MAX_DELAY);
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off green LED
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_SET); // Turn on red LED
+					  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_SET); // Turn On the buzzer
+	  			  }
+
+	  			  else //no contact enabled
+	  			  {
+	  				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff8, strlen(buff1), HAL_MAX_DELAY);
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_SET); // Turn on green LED
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off red LED
+					  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  			  }
+
+	  		  }
+
+	  		  else // If PA1 is high/ zone 2 swtich un pressed
+	  		  {
+	  				  HAL_UART_Transmit(&hlpuart1, (uint8_t *)buff5, strlen(buff1), HAL_MAX_DELAY);
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_GREEN_LED, GPIO_PIN_RESET); // Turn off red LED
+	  				  HAL_GPIO_WritePin(GPIOC, Zone_two_RED_LED, GPIO_PIN_RESET); // Turn off green LED
+	  				  HAL_GPIO_WritePin(GPIOC, buzzer, GPIO_PIN_RESET); // Turn Off the buzzer
+	  				  }
+
+	  		  HAL_Delay(10); // Adjust delay as needed
   }
   /* USER CODE END 3 */
 }

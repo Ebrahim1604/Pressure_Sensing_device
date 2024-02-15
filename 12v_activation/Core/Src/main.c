@@ -32,7 +32,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-// Pin aliasesv
+// Pin aliases
 #define twelve_v_switch GPIO_PIN_10
 #define twelve_v_RED_LED GPIO_PIN_7
 #define twelve_v_GREEN_LED GPIO_PIN_11
@@ -229,7 +229,7 @@ static void MX_LPUART1_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  if (HAL_UARTE	x_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
     Error_Handler();
   }
