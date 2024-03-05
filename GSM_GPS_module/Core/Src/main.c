@@ -35,6 +35,11 @@
 char smsMessage[] = "ZONE 1 ALARM ON";
 char phoneNumber[] = "+358400158835"; // Replace with your phone number
 
+/* Buffer for receiving responses */
+char rxBuffer[100];
+uint8_t rxIndex = 0;
+uint8_t rxComplete = 0;
+
 #define Zone_one_switch GPIO_PIN_0
 #define Zone_one_RED_LED GPIO_PIN_3
 #define Zone_one_GREEN_LED GPIO_PIN_6
@@ -43,6 +48,7 @@ char phoneNumber[] = "+358400158835"; // Replace with your phone number
 #define buzzer GPIO_PIN_4
 
 uint8_t zoneOneSwitchPressed = 0;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -67,6 +73,7 @@ static void MX_USART3_UART_Init(void);
 
 void sendSMS(char* phoneNumber, char* message);
 void makeCall(char* phoneNumber);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 /* USER CODE END PFP */
 
@@ -117,6 +124,8 @@ int main(void)
   sprintf(buff3,"Zone 1 signal detected....\n");
   sprintf(buff4,"No Zone 1 signal detected\n");
 
+  HAL_UART_Receive_IT(&huart3, (uint8_t*)rxBuffer, 1); // Start UART receive interrupt
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,15 +150,48 @@ int main(void)
 
 				  if (!zoneOneSwitchPressed) // Check if switch is not pressed before
 						{
-						  // Send SMS
-						  sendSMS(phoneNumber, smsMessage);
 
-						  HAL_Delay(3000);
+				  // Check network registration
+						  HAL_UART_Transmit(&huart3, (uint8_t*)"AT+CREG?\r\n", strlen("AT+CREG?\r\n"), HAL_MAX_DELAY);
 
-						  // Make a call
-						  makeCall(phoneNumber);
+						  while (!rxComplete); // Wait until response is received
+						  rxComplete = 0;
 
-						  HAL_Delay(3000);
+						  if (strstr(rxBuffer, "OK") != NULL)
+						          {
+						            // Set SMS mode to text
+						            HAL_UART_Transmit(&huart3, (uint8_t*)"AT+CMGF=1\r\n", strlen("AT+CMGF=1\r\n"), HAL_MAX_DELAY);
+
+						            while (!rxComplete); // Wait until response is received
+						            rxComplete = 0;
+
+						            if (strstr(rxBuffer, "OK") != NULL)
+						            {
+						              // Send SMS
+						              sendSMS(phoneNumber, smsMessage);
+
+						              HAL_Delay(2000);
+
+						              // Make a call
+						              makeCall(phoneNumber);
+
+						              // Send confirmation message
+						              HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Message sent and call made successfully.\r\n", strlen("Message sent and call made successfully.\r\n"), HAL_MAX_DELAY);
+						            }
+
+						            else
+						            {
+						              // Send error message for setting SMS mode
+						              HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Error setting SMS mode.\r\n", strlen("Error setting SMS mode.\r\n"), HAL_MAX_DELAY);
+						            }
+
+						          }
+						          else
+						          {
+						            // Send error message for network registration
+						            HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Error in network registration.\r\n", strlen("Error in network registration.\r\n"), HAL_MAX_DELAY);
+						          }
+						  HAL_Delay(2000);
 
 						  // Set switch pressed flag
 						  zoneOneSwitchPressed = 1;
@@ -395,22 +437,51 @@ static void MX_GPIO_Init(void)
 void sendSMS(char* phoneNumber, char* message)
 {
   char smsCommand[50];
-  sprintf(smsCommand, "AT+CMGS=\"%s\"", phoneNumber);
+  sprintf(smsCommand, "AT+CMGS=\"%s\"\r\n", phoneNumber);
 
   HAL_UART_Transmit(&huart3, (uint8_t*)smsCommand, strlen(smsCommand), HAL_MAX_DELAY);
   HAL_Delay(1000); // Delay for module response
 
   HAL_UART_Transmit(&huart3, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
   HAL_UART_Transmit(&huart3, (uint8_t*)"\x1A", 1, HAL_MAX_DELAY); // Send Ctrl+Z to indicate end of message
+
+  while (!rxComplete); // Wait until response is received
+  rxComplete = 0;
 }
 
 void makeCall(char* phoneNumber)
 {
   char callCommand[20];
-  sprintf(callCommand, "ATD%s;", phoneNumber);
+
+  sprintf(callCommand, "ATD%s;\r\n", phoneNumber);
 
   HAL_UART_Transmit(&huart3, (uint8_t*)callCommand, strlen(callCommand), HAL_MAX_DELAY);
-  //HAL_Delay(1000); // Adjust delay as needed
+
+  while (!rxComplete); // Wait until response is received
+  rxComplete = 0;
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART3) // If data received from GSM module
+  {
+    if (rxBuffer[rxIndex] == '\r' || rxBuffer[rxIndex] == '\n') // End of response
+    {
+      rxBuffer[rxIndex] = '\0'; // Null terminate string
+      rxComplete = 1;
+      rxIndex = 0;
+    }
+    else
+    {
+      rxIndex++;
+    }
+
+    HAL_UART_Receive_IT(&huart3, (uint8_t*)(rxBuffer + rxIndex), 1); // Receive next character
+  }
+  else
+  {
+    // Handle other UART instances if any
+  }
 }
 
 
