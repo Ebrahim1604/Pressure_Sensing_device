@@ -126,6 +126,7 @@ int main(void)
   sprintf(buff3,"Zone 1 signal detected....\n");
   sprintf(buff4,"No Zone 1 signal detected\n");
 
+  HAL_UART_RegisterCallback(&huart3, HAL_UART_RX_COMPLETE_CB_ID, HAL_UART_RxCpltCallback); // Register UART RX callback
   HAL_UART_Receive_IT(&huart3, (uint8_t*)rxBuffer, 1); // Start UART receive interrupt
 
   /* USER CODE END 2 */
@@ -153,7 +154,9 @@ int main(void)
 				  if (!zoneOneSwitchPressed) // Check if switch is not pressed before
 						{
 
-				  // Check network registration
+					  	  HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Sending SMS & CALL\r\n", strlen("Sending SMS & CALL\r\n"), HAL_MAX_DELAY);
+
+					  	  // Check network registration
 						  HAL_UART_Transmit(&huart3, (uint8_t*)"AT+CREG?\r\n", strlen("AT+CREG?\r\n"), HAL_MAX_DELAY);
 
 						  while (!rxComplete); // Wait until response is received
@@ -467,12 +470,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART3) // If data received from GSM module
   {
-    if (rxBuffer[rxIndex] == '\r' || rxBuffer[rxIndex] == '\n') // End of response
+	  if (rxBuffer[rxIndex] == '\r' || rxBuffer[rxIndex] == '\n') // End of response
     {
       rxBuffer[rxIndex] = '\0'; // Null terminate string
       rxComplete = 1;
       rxIndex = 0;
+      HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Something received from GSM\r\n", strlen("Something received from GSM\r\n"), HAL_MAX_DELAY);
     }
+
     else
     {
       rxIndex++;
